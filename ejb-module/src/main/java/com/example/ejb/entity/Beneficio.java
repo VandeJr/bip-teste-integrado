@@ -114,7 +114,7 @@ public class Beneficio implements Serializable {
                 ? "null"
                 : STR."\{description.substring(0, Math.min(description.length(), 20))}... [\{description.length()}]";
 
-        STR."""
+        return STR."""
             Beneficio{id=\{id}, \
             name='\{name}', \
             description='\{descFormatted}', \
