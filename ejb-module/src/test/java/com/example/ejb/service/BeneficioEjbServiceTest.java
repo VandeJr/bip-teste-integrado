@@ -135,23 +135,20 @@ class BeneficioEjbServiceTest {
         Throwable eNull = assertThrows(EJBException.class, () -> {
             beneficioService.transfer(fromId, toId, null);
         }).getCause();
-        System.out.println("AAAAAAAAA: " + eNull);
-        System.out.println("BBBBBBBBB: " + eNull.getMessage());
-        System.out.println("CCCCCCCCC: " + eNull.getMessage().contains("Invalid amount"));
 
         assertInstanceOf(IllegalArgumentException.class, eNull);
         assertTrue(eNull.getMessage().contains("Invalid amount"));
 
-        // Exception eZero = assertThrows(EJBException.class, () -> {
-        // beneficioService.transfer(fromId, toId, BigDecimal.ZERO);
-        // });
-        // assertInstanceOf(IllegalArgumentException.class, eZero.getCause());
-        // assertTrue(eZero.getCause().getMessage().contains("Invalid amount"));
+        Exception eZero = assertThrows(EJBException.class, () -> {
+            beneficioService.transfer(fromId, toId, BigDecimal.ZERO);
+        });
+        assertInstanceOf(IllegalArgumentException.class, eZero.getCause());
+        assertTrue(eZero.getCause().getMessage().contains("Invalid amount"));
 
-        // Exception eLtZero = assertThrows(EJBException.class, () -> {
-        // beneficioService.transfer(fromId, toId, new BigDecimal("-10.00"));
-        // });
-        // assertInstanceOf(IllegalArgumentException.class, eLtZero.getCause());
-        // assertTrue(eLtZero.getCause().getMessage().contains("Invalid amount"));
+        Exception eLtZero = assertThrows(EJBException.class, () -> {
+            beneficioService.transfer(fromId, toId, new BigDecimal("-10.00"));
+        });
+        assertInstanceOf(IllegalArgumentException.class, eLtZero.getCause());
+        assertTrue(eLtZero.getCause().getMessage().contains("Invalid amount"));
     }
 }
