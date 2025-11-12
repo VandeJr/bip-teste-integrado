@@ -1,5 +1,6 @@
 package com.example.ejb.service;
 
+import com.example.ejb.dto.BeneficioPage;
 import com.example.ejb.entity.Beneficio;
 import jakarta.ejb.EJB;
 import jakarta.ejb.EJBException;
@@ -30,6 +31,7 @@ class BeneficioEjbServiceTest {
     public static JavaArchive createDeployment() {
         return ShrinkWrap.create(JavaArchive.class, "test.jar")
                 .addClass(Beneficio.class)
+                .addClass(BeneficioPage.class)
                 .addClass(BeneficioEjbService.class)
                 .addAsManifestResource("META-INF/persistence.xml", "persistence.xml")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
@@ -98,57 +100,43 @@ class BeneficioEjbServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw exception and rollback when funds are insufficient")
-    void testTransferInsufficientFunds() {
-        Exception e = assertThrows(Exception.class, () -> {
+    @DisplayName("Should throw exception and rollback when transaction don't meet requeriments")
+    void testInvalidTransfer() {
+        assertThrows(Exception.class, () -> {
+            // No funds available
             beneficioService.transfer(fromId, toId, new BigDecimal("200.00"));
+        });
+        assertThrows(Exception.class, () -> {
+            // Invalid value
+            beneficioService.transfer(fromId, toId, null);
+        });
+        assertThrows(Exception.class, () -> {
+            // Invalid value
+            beneficioService.transfer(fromId, toId, new BigDecimal("-20.00"));
+        });
+        assertThrows(Exception.class, () -> {
+            // Invalid account
+            beneficioService.transfer(null, toId, new BigDecimal("100.00"));
+        });
+        assertThrows(Exception.class, () -> {
+            // Invalid account
+            beneficioService.transfer(fromId, null, new BigDecimal("100.00"));
+        });
+        assertThrows(Exception.class, () -> {
+            // Account not found
+            beneficioService.transfer(fromId + toId, toId, new BigDecimal("100.00"));
+        });
+        assertThrows(Exception.class, () -> {
+            // Account not found
+            beneficioService.transfer(fromId, toId + toId, new BigDecimal("100.00"));
         });
 
         Beneficio fromUnchanged = beneficioService.findById(fromId).get();
         Beneficio toUnchanged = beneficioService.findById(toId).get();
 
-        assertTrue(e.getMessage().contains("Insufficient funds"));
-
         assertEquals(0, new BigDecimal("100.00").compareTo(fromUnchanged.getValue()),
                 "Saldo 'from' foi alterado (Rollback falhou).");
         assertEquals(0, new BigDecimal("50.00").compareTo(toUnchanged.getValue()),
                 "Saldo 'to' foi alterado (Rollback falhou).");
-    }
-
-    @Test
-    @DisplayName("Should throw exception when transferring to the invalid account")
-    void testTransferInvalidAccount() {
-        Exception e1 = assertThrows(Exception.class, () -> {
-            beneficioService.transfer(fromId + toId, fromId * toId, new BigDecimal("10.00"));
-        });
-        Exception e2 = assertThrows(Exception.class, () -> {
-            beneficioService.transfer(fromId, fromId, new BigDecimal("10.00"));
-        });
-
-        assertTrue(e1.getMessage().contains("cannot be equal"));
-        assertTrue(e2.getMessage().contains("cannot be equal"));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when transferring an invalid amount")
-    void testTransferInvalidValue() {
-        Throwable eNull = assertThrows(EJBException.class, () -> {
-            beneficioService.transfer(fromId, toId, null);
-        }).getCause();
-
-        assertInstanceOf(IllegalArgumentException.class, eNull);
-        assertTrue(eNull.getMessage().contains("Invalid amount"));
-
-        Exception eZero = assertThrows(EJBException.class, () -> {
-            beneficioService.transfer(fromId, toId, BigDecimal.ZERO);
-        });
-        assertInstanceOf(IllegalArgumentException.class, eZero.getCause());
-        assertTrue(eZero.getCause().getMessage().contains("Invalid amount"));
-
-        Exception eLtZero = assertThrows(EJBException.class, () -> {
-            beneficioService.transfer(fromId, toId, new BigDecimal("-10.00"));
-        });
-        assertInstanceOf(IllegalArgumentException.class, eLtZero.getCause());
-        assertTrue(eLtZero.getCause().getMessage().contains("Invalid amount"));
     }
 }

@@ -1,5 +1,6 @@
 package com.example.ejb.service;
 
+import com.example.ejb.dto.BeneficioPage;
 import com.example.ejb.entity.Beneficio;
 
 import jakarta.ejb.Stateless;
@@ -97,8 +98,18 @@ public class BeneficioEjbService {
         return Optional.ofNullable(em.find(Beneficio.class, id));
     }
 
-    public List<Beneficio> findAll() {
-        return em.createQuery("SELECT b FROM Beneficio b", Beneficio.class).getResultList();
+    public BeneficioPage findAll(int page, int size) {
+        int offset = page * size;
+
+        List<Beneficio> content = em.createQuery("SELECT b FROM Beneficio b ORDER BY b.id ASC", Beneficio.class)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
+
+        Long totalElements = (Long) em.createQuery("SELECT COUNT(b) FROM Beneficio b")
+                .getSingleResult();
+
+        return new BeneficioPage(content, totalElements);
     }
 
     public Beneficio update(Long id, Beneficio updated) {
