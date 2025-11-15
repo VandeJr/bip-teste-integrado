@@ -1,0 +1,35 @@
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: beneficio-postgres
+    environment:
+      POSTGRES_DB: beneficiodb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d beneficiodb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ejb-module:
+    build:
+      context: ./ejb-module/
+    container_name: wildfly_ejb
+    environment:
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_NAME: beneficiodb
+      DB_USER: admin
+      DB_PASS: admin
+    depends_on:
+        - postgres-db
+    ports:
+      - 8080:8080
+      - 9990:9990
+volumes:
+  pgdata:

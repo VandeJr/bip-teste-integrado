@@ -90,9 +90,9 @@ class BeneficioEjbServiceTest {
     void testSuccessfulTransfer() {
         beneficioService.transfer(fromId, toId, new BigDecimal("25.00"));
 
-        Beneficio fromUpdated = beneficioService.findById(fromId)
+        Beneficio fromUpdated = beneficioService._findById(fromId)
                 .orElseThrow(() -> new AssertionError("Conta 'from' não encontrada."));
-        Beneficio toUpdated = beneficioService.findById(toId)
+        Beneficio toUpdated = beneficioService._findById(toId)
                 .orElseThrow(() -> new AssertionError("Conta 'to' não encontrada."));
 
         assertEquals(0, new BigDecimal("75.00").compareTo(fromUpdated.getValue()), "Saldo 'from' incorreto.");
@@ -131,8 +131,8 @@ class BeneficioEjbServiceTest {
             beneficioService.transfer(fromId, toId + toId, new BigDecimal("100.00"));
         });
 
-        Beneficio fromUnchanged = beneficioService.findById(fromId).get();
-        Beneficio toUnchanged = beneficioService.findById(toId).get();
+        Beneficio fromUnchanged = beneficioService.findById(fromId);
+        Beneficio toUnchanged = beneficioService.findById(toId);
 
         assertEquals(0, new BigDecimal("100.00").compareTo(fromUnchanged.getValue()),
                 "Saldo 'from' foi alterado (Rollback falhou).");

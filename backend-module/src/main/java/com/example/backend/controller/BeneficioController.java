@@ -2,7 +2,9 @@ package com.example.backend.controller;
 
 import com.example.ejb.entity.Beneficio;
 import com.example.backend.service.BeneficioService;
+import com.example.backend.dto.BeneficioRequest;
 import com.example.backend.dto.TransferRequest;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,7 +31,12 @@ public class BeneficioController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Beneficio create(@RequestBody Beneficio beneficio) {
+    public Beneficio create(@Valid @RequestBody BeneficioRequest requestDTO) {
+        Beneficio beneficio = new Beneficio();
+        beneficio.setName(requestDTO.name());
+        beneficio.setDescription(requestDTO.description());
+        beneficio.setValue(requestDTO.value());
+        beneficio.setActive(requestDTO.active());
         return service.create(beneficio);
     }
 
@@ -41,7 +48,13 @@ public class BeneficioController {
     }
 
     @PutMapping("/{id}")
-    public Beneficio update(@PathVariable("id") Long id, @RequestBody Beneficio beneficio) {
+    public Beneficio update(@PathVariable("id") Long id, @Valid @RequestBody BeneficioRequest requestDTO) {
+        Beneficio beneficio = new Beneficio();
+        beneficio.setName(requestDTO.name());
+        beneficio.setDescription(requestDTO.description());
+        beneficio.setValue(requestDTO.value());
+        beneficio.setActive(requestDTO.active());
+
         return service.update(beneficio, id);
     }
 
@@ -52,16 +65,9 @@ public class BeneficioController {
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<?> transfer(@RequestBody TransferRequest request) {
-        try {
-            service.transfer(request.fromId(), request.toId(), request.amount());
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            Throwable cause = e.getCause();
-            if (cause != null) {
-                return ResponseEntity.badRequest().body(cause.getMessage());
-            }
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> transfer(@Valid @RequestBody TransferRequest request) {
+        service.transfer(request.fromId(), request.toId(), request.amount());
+        return ResponseEntity.ok().build();
+
     }
 }

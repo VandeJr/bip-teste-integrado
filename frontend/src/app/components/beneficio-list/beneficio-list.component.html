@@ -1,0 +1,45 @@
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Benefícios</h1>
+    <div>
+      <a routerLink="/beneficios/new" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Novo Benefício
+      </a>
+      <a routerLink="/transfer" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2">
+        Transferir
+      </a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center h-64">
+      <app-loading-spinner />
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (beneficio of beneficios(); track beneficio.id) {
+        <div class="border rounded-lg p-4">
+          <h2 class="text-xl font-semibold">{{ beneficio.name }}</h2>
+          <p class="text-gray-600">{{ beneficio.description }}</p>
+          <div class="mt-2">
+            <span class="text-lg font-bold">R$ {{ beneficio.value }}</span>
+          </div>
+          <div class="mt-4 flex space-x-2">
+            <a [routerLink]="['/beneficios', beneficio.id, 'edit']" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+              Editar
+            </a>
+            <button (click)="deleteBeneficio(beneficio.id)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+              Excluir
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+    <app-pagination
+      [currentPage]="page"
+      [totalPages]="totalPages()"
+      [totalElements]="totalElements()"
+      (pageChange)="onPageChange($event)"
+    ></app-pagination>
+  }
+</div>

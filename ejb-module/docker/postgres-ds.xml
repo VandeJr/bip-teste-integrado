@@ -1,0 +1,16 @@
+<datasources xmlns="http://www.jboss.org/schema/wildfly/datasources_7_0">
+    <datasource jndi-name="java:jboss/datasources/PostgresDS"
+        pool-name="PostgresDS"
+        enabled="true"
+        use-java-context="true">
+
+        <connection-url>jdbc:postgresql://postgres-db:5432/beneficiodb</connection-url>
+
+        <driver>postgresql-42.7.7.jar</driver>
+
+        <security>
+            <user-name>admin</user-name>
+            <password>admin</password>
+        </security>
+    </datasource>
+</datasources>

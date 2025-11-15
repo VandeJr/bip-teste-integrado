@@ -12,6 +12,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceContext;
+import jakarta.ejb.LocalBean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.lang.StringTemplate.STR;
+
 @Stateless
-public class BeneficioEjbService {
+@LocalBean
+public class BeneficioEjbService implements BeneficioServiceRemote {
 
     @PersistenceContext
     private EntityManager em;
@@ -33,6 +37,7 @@ public class BeneficioEjbService {
     private static final int MAX_RETRIES = 3;
     private static final Logger logger = LoggerFactory.getLogger(BeneficioEjbService.class);
 
+    @Override
     public void transfer(Long fromId, Long toId, BigDecimal amount) {
         validateParameters(fromId, toId, amount);
 
@@ -57,9 +62,9 @@ public class BeneficioEjbService {
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void doTransfer(Long fromId, Long toId, BigDecimal amount) {
-        Beneficio from = this.findById(fromId)
+        Beneficio from = Optional.ofNullable(this.findById(fromId))
                 .orElseThrow(() -> new EntityNotFoundException(STR."Origin account not found (ID: \{fromId})"));
-        Beneficio to = this.findById(toId)
+        Beneficio to = Optional.ofNullable(this.findById(toId))
                 .orElseThrow(() -> new EntityNotFoundException(STR."Destination account not found (ID: \{toId})"));
 
         BigDecimal fromValor = from.getValue();
@@ -81,6 +86,7 @@ public class BeneficioEjbService {
             throw new IllegalArgumentException("Invalid amount: Must not be null and must be greater than zero.");
     }
 
+    @Override
     public Beneficio create(Beneficio beneficio) {
         if (beneficio == null)
             throw new IllegalArgumentException("Beneficio cannot be null.");
@@ -94,10 +100,16 @@ public class BeneficioEjbService {
         return beneficio;
     }
 
-    public Optional<Beneficio> findById(Long id) {
-        return Optional.ofNullable(em.find(Beneficio.class, id));
+    @Override
+    public Beneficio findById(Long id) {
+        return em.find(Beneficio.class, id);
     }
 
+    public Optional<Beneficio> _findById(Long id) {
+        return Optional.ofNullable(this.findById(id));
+    }
+
+    @Override
     public BeneficioPage findAll(int page, int size) {
         int offset = page * size;
 
@@ -112,8 +124,9 @@ public class BeneficioEjbService {
         return new BeneficioPage(content, totalElements);
     }
 
+    @Override
     public Beneficio update(Long id, Beneficio updated) {
-        Beneficio existing = this.findById(id)
+        Beneficio existing = this._findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(STR."Beneficio with ID \{id} not found"));
 
         existing.setName(updated.getName());
@@ -124,8 +137,9 @@ public class BeneficioEjbService {
         return em.merge(existing);
     }
 
+    @Override
     public void delete(Long id) {
-        Beneficio existing = this.findById(id)
+        Beneficio existing = this._findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(STR."Beneficio with ID \{id} not found"));
         em.remove(existing);
     }

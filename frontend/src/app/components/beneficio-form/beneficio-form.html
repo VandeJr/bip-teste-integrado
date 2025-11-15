@@ -1,0 +1,73 @@
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl font-bold mb-4">
+    @if (editingBeneficioId) {
+      Editar Benefício
+    } @else {
+      Novo Benefício
+    }
+  </h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <div class="mb-4">
+      <label for="name" class="block text-gray-700 font-bold mb-2">Nome</label>
+      <input type="text" id="name" formControlName="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+             [class.border-red-500]="name?.invalid && (name?.touched || name?.dirty)">
+
+      @if (name?.invalid && (name?.touched || name?.dirty)) {
+        <div class="text-red-500 text-xs italic mt-1">
+          @if (name?.hasError('required')) {
+            <span>O nome é obrigatório.</span>
+          }
+          @if (name?.hasError('maxlength')) {
+            <span>O nome não pode exceder 100 caracteres.</span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="mb-4">
+      <label for="description" class="block text-gray-700 font-bold mb-2">Descrição</label>
+      <textarea id="description" formControlName="description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                [class.border-red-500]="description?.invalid && (description?.touched || description?.dirty)"></textarea>
+
+      @if (description?.invalid && (description?.touched || description?.dirty)) {
+        <div class="text-red-500 text-xs italic mt-1">
+          @if (description?.hasError('required')) {
+            <span>A descrição é obrigatória.</span>
+          }
+          @if (description?.hasError('maxlength')) {
+            <span>A descrição não pode exceder 255 caracteres.</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Campo Valor -->
+    <div class="mb-4">
+      <label for="value" class="block text-gray-700 font-bold mb-2">Valor</label>
+      <input type="number" id="value" formControlName="value" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+             [class.border-red-500]="value?.invalid && (value?.touched || value?.dirty)">
+
+      @if (value?.invalid && (value?.touched || value?.dirty)) {
+        <div class="text-red-500 text-xs italic mt-1">
+          @if (value?.hasError('required')) {
+            <span>O valor é obrigatório.</span>
+          }
+          @if (value?.hasError('min')) {
+            <span>O valor deve ser 0 ou maior.</span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="flex items-center justify-between">
+      <button type="submit" [disabled]="form.invalid" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-gray-400">
+        Salvar
+      </button>
+      <a routerLink="/" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</div>

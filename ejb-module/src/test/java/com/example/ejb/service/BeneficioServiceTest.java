@@ -118,7 +118,7 @@ class BeneficioServiceTest {
     @Test
     @DisplayName("Should FIND a Beneficio by ID")
     void testFindById_Success() {
-        Optional<Beneficio> resultado = beneficioService.findById(fromId);
+        Optional<Beneficio> resultado = beneficioService._findById(fromId);
 
         assertTrue(resultado.isPresent());
         assertEquals("Conta Origem", resultado.get().getName());
@@ -127,7 +127,7 @@ class BeneficioServiceTest {
     @Test
     @DisplayName("Should return empty Optional when FINDING non-existent ID")
     void testFindById_NotFound() {
-        Optional<Beneficio> resultado = beneficioService.findById(nonExistentId);
+        Optional<Beneficio> resultado = beneficioService._findById(nonExistentId);
 
         assertTrue(resultado.isEmpty());
     }
@@ -137,22 +137,22 @@ class BeneficioServiceTest {
     void testFindAll_Paginated() {
         BeneficioPage page1 = beneficioService.findAll(0, 1);
 
-        assertEquals(1, page1.content().size());
-        assertEquals(2, page1.totalElements());
+        assertEquals(1, page1.getContent().size());
+        assertEquals(2, page1.getTotalElements());
 
         BeneficioPage page2 = beneficioService.findAll(1, 1);
-        assertEquals(1, page2.content().size());
-        assertEquals(2, page2.totalElements());
+        assertEquals(1, page2.getContent().size());
+        assertEquals(2, page2.getTotalElements());
 
         BeneficioPage pageCompleta = beneficioService.findAll(0, 5);
-        assertEquals(2, pageCompleta.content().size());
-        assertEquals(2, pageCompleta.totalElements());
+        assertEquals(2, pageCompleta.getContent().size());
+        assertEquals(2, pageCompleta.getTotalElements());
     }
 
     @Test
     @DisplayName("Should UPDATE an existing Beneficio")
     void testUpdateBeneficio() {
-        Beneficio paraAtualizar = beneficioService.findById(toId).get();
+        Beneficio paraAtualizar = beneficioService.findById(toId);
         Long versaoAntiga = paraAtualizar.getVersion();
 
         paraAtualizar.setName("Nome Atualizado");
