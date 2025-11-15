@@ -9,7 +9,7 @@ import { Beneficio } from '../model/beneficio';
 })
 export class BeneficioService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8090/api/v1/beneficios';
+  private readonly apiUrl = '/api/v1/beneficios';
 
   findAll(page: number, size: number): Observable<Page<Beneficio>> {
     const params = new HttpParams()

@@ -1,10 +1,6 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BeneficioListComponent } from './beneficio-list.component';
-import { BeneficioService } from '../../services/beneficio.service';
-import { of, Subject } from 'rxjs';
-import { Page } from '../../model/page';
 import { Beneficio } from '../../model/beneficio';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner';
 import { By } from '@angular/platform-browser';
@@ -13,92 +9,74 @@ import { DebugElement } from '@angular/core';
 describe('BeneficioListComponent', () => {
   let component: BeneficioListComponent;
   let fixture: ComponentFixture<BeneficioListComponent>;
-  let beneficioService: BeneficioService;
 
-  const mockBeneficiosPage: Page<Beneficio> = {
-    content: [
-      { id: 1, name: 'Beneficio 1', description: 'Desc 1', value: 100, active: true, version: 1 },
-      { id: 2, name: 'Beneficio 2', description: 'Desc 2', value: 200, active: true, version: 1 }
-    ],
-    totalElements: 2,
-    totalPages: 1,
-    size: 10,
-    number: 0
-  };
+  const mockBeneficios: Beneficio[] = [
+    { id: 1, name: 'Beneficio 1', description: 'Desc 1', value: 100, active: true, version: 1 },
+    { id: 2, name: 'Beneficio 2', description: 'Desc 2', value: 200, active: true, version: 1 }
+  ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        HttpClientTestingModule,
         RouterTestingModule,
         BeneficioListComponent,
         LoadingSpinnerComponent
-      ],
-      providers: [BeneficioService]
-    })
-    .compileComponents();
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(BeneficioListComponent);
     component = fixture.componentInstance;
-    beneficioService = TestBed.inject(BeneficioService);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show loading spinner and then load beneficios on init', fakeAsync(() => {
-    const findAllSubject = new Subject<Page<Beneficio>>();
-    spyOn(beneficioService, 'findAll').and.returnValue(findAllSubject.asObservable());
-
-    fixture.detectChanges(); // ngOnInit()
-
-    expect(component.loading()).toBe(true);
-    let spinner: DebugElement = fixture.debugElement.query(By.directive(LoadingSpinnerComponent));
-    expect(spinner).toBeTruthy();
-
-    findAllSubject.next(mockBeneficiosPage);
-    findAllSubject.complete();
-    tick();
+  it('should display loading spinner when loading is true', () => {
+    component.loading = true;
     fixture.detectChanges();
+    const spinner: DebugElement = fixture.debugElement.query(By.directive(LoadingSpinnerComponent));
+    expect(spinner).toBeTruthy();
+  });
 
-    expect(component.loading()).toBe(false);
-    spinner = fixture.debugElement.query(By.directive(LoadingSpinnerComponent));
+  it('should not display loading spinner when loading is false', () => {
+    component.loading = false;
+    fixture.detectChanges();
+    const spinner: DebugElement = fixture.debugElement.query(By.directive(LoadingSpinnerComponent));
     expect(spinner).toBeFalsy();
-
-    expect(beneficioService.findAll).toHaveBeenCalledWith(0, 10);
-    expect(component.beneficios().length).toBe(2);
-    expect(component.totalElements()).toBe(2);
-    expect(component.totalPages()).toBe(1);
-    expect(component.beneficios()[0].name).toBe('Beneficio 1');
-  }));
-
-  it('should delete a beneficio and reload the list if confirmed', () => {
-    spyOn(window, 'confirm').and.returnValue(true);
-    spyOn(beneficioService, 'delete').and.returnValue(of(undefined));
-    spyOn(beneficioService, 'findAll').and.returnValue(of(mockBeneficiosPage));
-
-    component.deleteBeneficio(1);
-
-    expect(window.confirm).toHaveBeenCalled();
-    expect(beneficioService.delete).toHaveBeenCalledWith(1);
-    expect(beneficioService.findAll).toHaveBeenCalled();
   });
 
-  it('should not delete a beneficio if not confirmed', () => {
-    spyOn(window, 'confirm').and.returnValue(false);
-    spyOn(beneficioService, 'delete').and.returnValue(of(undefined));
-
-    component.deleteBeneficio(1);
-
-    expect(window.confirm).toHaveBeenCalled();
-    expect(beneficioService.delete).not.toHaveBeenCalled();
+  it('should display a list of beneficios', () => {
+    component.beneficios = mockBeneficios;
+    fixture.detectChanges();
+    const beneficioElements = fixture.debugElement.queryAll(By.css('.border.rounded-lg'));
+    expect(beneficioElements.length).toBe(2);
+    const firstBeneficio = beneficioElements[0].nativeElement;
+    expect(firstBeneficio.querySelector('h3').textContent).toContain('Beneficio 1');
   });
 
-  it('should change page and reload beneficios', () => {
-    spyOn(component, 'loadBeneficios');
-    component.onPageChange(1);
-    expect((component as any).page).toBe(1);
-    expect(component.loadBeneficios).toHaveBeenCalled();
+  it('should emit add event on onAdd', () => {
+    spyOn(component.add, 'emit');
+    component.onAdd();
+    expect(component.add.emit).toHaveBeenCalled();
+  });
+
+  it('should emit edit event with beneficio on onEdit', () => {
+    spyOn(component.edit, 'emit');
+    const beneficio = mockBeneficios[0];
+    component.onEdit(beneficio);
+    expect(component.edit.emit).toHaveBeenCalledWith(beneficio);
+  });
+
+  it('should emit delete event with id on onDelete', () => {
+    spyOn(component.delete, 'emit');
+    component.onDelete(1);
+    expect(component.delete.emit).toHaveBeenCalledWith(1);
+  });
+
+  it('should emit pageChange event on onPageChange', () => {
+    spyOn(component.pageChange, 'emit');
+    component.onPageChange(2);
+    expect(component.pageChange.emit).toHaveBeenCalledWith(2);
   });
 });

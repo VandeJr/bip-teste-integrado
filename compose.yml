@@ -1,35 +1,63 @@
 services:
   postgres-db:
     image: postgres:16-alpine
-    container_name: beneficio-postgres
+    container_name: postgres-db
     environment:
-      POSTGRES_DB: beneficiodb
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - 5432:5432
+      - ${POSTGRES_PORT}:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d beneficiodb"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   ejb-module:
+    container_name: ejb-module
     build:
       context: ./ejb-module/
-    container_name: wildfly_ejb
+      args:
+        EJB_USER: ${EJB_USER}
+        EJB_PASS: ${EJB_PASS}
     environment:
       DB_HOST: postgres-db
       DB_PORT: 5432
-      DB_NAME: beneficiodb
-      DB_USER: admin
-      DB_PASS: admin
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
     depends_on:
         - postgres-db
     ports:
-      - 8080:8080
-      - 9990:9990
+      - "${WILDFLY_PORT}:8080"
+      - "${WILDFLY_ADMIN_PORT}:9990"
+
+  backend-module:
+    container_name: beneficio-spring-api
+    build:
+      context: ./backend-module
+    ports:
+      - "${SPRING_API_PORT}:8090"
+    depends_on:
+      - ejb-module
+    environment:
+      - EJB_HOST=ejb-module
+      - EJB_PORT=8080
+      - EJB_USER=${EJB_USER}
+      - EJB_PASS=${EJB_PASS}
+      - SERVER_PORT=8090
+
+  frontend-app:
+    container_name: beneficio-angular-app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend-module
 volumes:
   pgdata:

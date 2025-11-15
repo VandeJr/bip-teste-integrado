@@ -1,0 +1,15 @@
+<app-modal
+  [isOpen]="isOpen"
+  [title]="'Confirmar Exclusão'"
+  (close)="onCancel()"
+>
+  <p>Tem certeza que deseja excluir este {{ itemType }}?</p>
+  <div class="flex justify-end space-x-2 mt-4">
+    <button (click)="onCancel()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+      Cancelar
+    </button>
+    <button (click)="onConfirm()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+      Excluir
+    </button>
+  </div>
+</app-modal>

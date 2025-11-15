@@ -1,9 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { BeneficioService } from '../../services/beneficio.service';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { Beneficio } from '../../model/beneficio';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { finalize } from 'rxjs';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner';
 import { PaginationComponent } from '../pagination/pagination';
 
@@ -14,41 +12,31 @@ import { PaginationComponent } from '../pagination/pagination';
   standalone: true,
   imports: [CommonModule, RouterModule, LoadingSpinnerComponent, PaginationComponent]
 })
-export class BeneficioListComponent implements OnInit {
-  private readonly beneficioService = inject(BeneficioService);
+export class BeneficioListComponent {
+  @Input() beneficios: Beneficio[] = [];
+  @Input() totalElements: number = 0;
+  @Input() totalPages: number = 0;
+  @Input() loading: boolean = false;
+  @Input() currentPage: number = 0;
 
-  public beneficios = signal<Beneficio[]>([]);
-  public totalElements = signal(0);
-  public totalPages = signal(0);
-  public loading = signal(false);
-  protected page = 0;
-  protected size = 10;
-
-  ngOnInit(): void {
-    this.loadBeneficios();
-  }
-
-  loadBeneficios(): void {
-    this.loading.set(true);
-    this.beneficioService.findAll(this.page, this.size)
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe(data => {
-        this.beneficios.set(data.content);
-        this.totalElements.set(data.totalElements);
-        this.totalPages.set(data.totalPages);
-      });
-  }
+  @Output() pageChange = new EventEmitter<number>();
+  @Output() delete = new EventEmitter<number>();
+  @Output() edit = new EventEmitter<Beneficio>();
+  @Output() add = new EventEmitter<void>();
 
   onPageChange(newPage: number): void {
-    this.page = newPage;
-    this.loadBeneficios();
+    this.pageChange.emit(newPage);
   }
 
-  deleteBeneficio(beneficioId: number): void {
-    if (confirm('Tem certeza que deseja excluir este benefício?')) {
-      this.beneficioService.delete(beneficioId).subscribe(() => {
-        this.loadBeneficios();
-      });
-    }
+  onAdd(): void {
+    this.add.emit();
+  }
+
+  onEdit(beneficio: Beneficio): void {
+    this.edit.emit(beneficio);
+  }
+
+  onDelete(beneficioId: number): void {
+    this.delete.emit(beneficioId);
   }
 }

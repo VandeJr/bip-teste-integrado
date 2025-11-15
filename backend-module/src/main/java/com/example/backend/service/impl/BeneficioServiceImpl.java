@@ -1,20 +1,21 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.service.BeneficioService;
+import com.example.backend.config.EJBProperties;
 
 import com.example.ejb.dto.BeneficioPage;
 import com.example.ejb.entity.Beneficio;
 import com.example.ejb.service.BeneficioServiceRemote;
 
-import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 import java.math.BigDecimal;
 import java.util.Properties;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -25,11 +26,19 @@ public class BeneficioServiceImpl implements BeneficioService {
 
     private BeneficioServiceRemote ejb;
 
-    public BeneficioServiceImpl() {
+    @Autowired
+    public BeneficioServiceImpl(EJBProperties ejbProps) {
         try {
             final Properties jndiProperties = new Properties();
             jndiProperties.put(Context.INITIAL_CONTEXT_FACTORY,
                     "org.wildfly.naming.client.WildFlyInitialContextFactory");
+            System.out.println(ejbProps.getUsername());
+            jndiProperties.put(Context.PROVIDER_URL, "remote+http://" + ejbProps.getHost() + ":" + ejbProps.getPort());
+            jndiProperties.put(Context.SECURITY_PRINCIPAL, ejbProps.getUsername());
+            jndiProperties.put(Context.SECURITY_CREDENTIALS, ejbProps.getPassword());
+
+            System.out.println(jndiProperties);
+            System.out.println(ejbProps.getUsername());
 
             final Context context = new InitialContext(jndiProperties);
             String jndiName = "ejb:/ejb-module-1.0-SNAPSHOT/BeneficioEjbService!"

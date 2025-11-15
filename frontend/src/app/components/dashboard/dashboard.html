@@ -1,0 +1,41 @@
+<div class="container mx-auto">
+  <h1 class="text-3xl font-bold mb-6">Dashboard de Benefícios</h1>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+      <app-beneficio-list
+        [beneficios]="beneficios()"
+        [totalElements]="totalElements()"
+        [totalPages]="totalPages()"
+        [loading]="loading()"
+        [currentPage]="page"
+        (pageChange)="onPageChange($event)"
+        (add)="onAdd()"
+        (edit)="onEdit($event)"
+        (delete)="onDelete($event)"
+      ></app-beneficio-list>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4">Transferir Saldo</h2>
+      <app-transfer-form (transferComplete)="onTransferComplete()"></app-transfer-form>
+    </div>
+  </div>
+</div>
+
+<app-modal
+  [isOpen]="isBeneficioModalOpen"
+  [title]="editingBeneficio ? 'Editar Benefício' : 'Novo Benefício'"
+  (close)="onCloseBeneficioModal()"
+>
+  <app-beneficio-form
+    [beneficio]="editingBeneficio"
+    (save)="onSaveBeneficio($event)"
+    (cancel)="onCloseBeneficioModal()"
+  ></app-beneficio-form>
+</app-modal>
+
+<app-delete-confirmation-modal
+  [isOpen]="isDeleteModalOpen"
+  itemType="benefício"
+  (confirm)="onConfirmDelete()"
+  (cancel)="onCancelDelete()"
+></app-delete-confirmation-modal>

@@ -109,6 +109,7 @@ class BeneficioControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Invalid amount: Must not be null and must be greater than zero."));
+                .andExpect(jsonPath("$.message").value("Validation failed. Check 'fieldErrors' for details."))
+                .andExpect(jsonPath("$.fieldErrors.amount").value("Amount must be greater than 0.1"));
     }
 }

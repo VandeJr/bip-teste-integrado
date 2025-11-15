@@ -1,6 +1,7 @@
 package com.example.ejb.service;
 
 import com.example.ejb.entity.Beneficio;
+import com.example.ejb.service.BeneficioServiceRemote;
 import com.example.ejb.dto.BeneficioPage;
 import jakarta.ejb.EJB;
 import jakarta.ejb.EJBException;
@@ -34,6 +35,7 @@ class BeneficioServiceTest {
                 .addClass(Beneficio.class)
                 .addClass(BeneficioEjbService.class)
                 .addClass(BeneficioPage.class)
+                .addClass(BeneficioServiceRemote.class)
                 .addAsManifestResource("META-INF/persistence.xml", "persistence.xml")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }

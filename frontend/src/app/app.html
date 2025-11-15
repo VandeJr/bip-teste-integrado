@@ -1,16 +1,14 @@
-<nav class="bg-gray-800 text-white p-4">
-  <div class="container mx-auto flex justify-between items-center">
-    <a routerLink="/" class="text-2xl font-bold">BIP - Gestão de Benefícios</a>
+<nav class="bg-white shadow-md">
+  <div class="container mx-auto flex justify-between items-center p-4">
+    <a routerLink="/" class="text-2xl font-bold text-indigo-600">BIP</a>
     <div>
-      <a routerLink="/home" class="px-4 py-2 hover:bg-gray-700 rounded">Home</a>
-      <a routerLink="/beneficios" class="px-4 py-2 hover:bg-gray-700 rounded">Benefícios</a>
-      <a routerLink="/transfer" class="px-4 py-2 hover:bg-gray-700 rounded">Transferir</a>
+      <a routerLink="/home" class="px-4 py-2 text-gray-600 hover:text-indigo-600 rounded">Dashboard</a>
     </div>
   </div>
 </nav>
-<main class="p-4">
+<main class="p-4 md:p-8">
   <router-outlet />
 </main>
-<footer class="bg-gray-800 text-white p-4 text-center fixed bottom-0 w-full">
-  <p>&copy; 2025 BIP - Gestão de Benefícios. Todos os direitos reservados.</p>
+<footer class="text-center p-4 mt-8">
+  <p class="text-sm text-gray-500">&copy; 2025 BIP - Gestão de Benefícios</p>
 </footer>

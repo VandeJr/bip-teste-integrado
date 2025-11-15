@@ -33,6 +33,7 @@ class BeneficioEjbServiceTest {
                 .addClass(Beneficio.class)
                 .addClass(BeneficioPage.class)
                 .addClass(BeneficioEjbService.class)
+                .addClass(BeneficioServiceRemote.class)
                 .addAsManifestResource("META-INF/persistence.xml", "persistence.xml")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }

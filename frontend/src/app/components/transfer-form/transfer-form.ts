@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { BeneficioService } from '../../services/beneficio.service';
 import { CommonModule } from '@angular/common';
 import { Beneficio } from '../../model/beneficio';
@@ -15,10 +15,12 @@ import { Beneficio } from '../../model/beneficio';
 export class TransferFormComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly beneficioService = inject(BeneficioService);
-  private readonly router = inject(Router);
+
+  @Output() transferComplete = new EventEmitter<void>();
 
   form!: FormGroup;
   beneficios = signal<Beneficio[]>([]);
+  transferSuccess = signal(false);
 
   ngOnInit(): void {
     this.form = this.formBuilder.group({
@@ -30,6 +32,7 @@ export class TransferFormComponent implements OnInit {
   }
 
   loadBeneficios(): void {
+    // Load all benefits for the dropdowns
     this.beneficioService.findAll(0, 1000).subscribe(data => {
       this.beneficios.set(data.content);
     });
@@ -49,7 +52,6 @@ export class TransferFormComponent implements OnInit {
     this.form.markAllAsTouched();
 
     if (this.form.invalid) {
-      console.error('Formulário inválido (erros padrão).');
       return;
     }
 
@@ -61,20 +63,17 @@ export class TransferFormComponent implements OnInit {
     }
 
     const beneficioOrigem = this.beneficios().find(b => b.id === fromId);
-
-    if (!beneficioOrigem) {
-      console.error('Benefício de origem não encontrado!');
-      return;
-    }
-
-    if (amount > beneficioOrigem.value) {
+    if (!beneficioOrigem || amount > beneficioOrigem.value) {
       this.amount?.setErrors({ saldoInsuficiente: true });
       return;
     }
 
-    console.log('Formulário válido! Enviando transferência...');
     this.beneficioService.transfer(fromId, toId, amount).subscribe(() => {
-      this.router.navigate(['/']);
+      this.transferSuccess.set(true);
+      this.form.reset();
+      this.transferComplete.emit();
+      this.loadBeneficios(); // Refresh dropdowns
+      setTimeout(() => this.transferSuccess.set(false), 3000);
     });
   }
 }

@@ -67,9 +67,9 @@ describe('TransferFormComponent', () => {
     expect(component.form.valid).toBeTruthy();
   });
 
-  it('should call transfer and navigate on submit', () => {
+  it('should call transfer and emit event on submit', () => {
     spyOn(beneficioService, 'transfer').and.returnValue(of(undefined));
-    spyOn(router, 'navigate');
+    spyOn(component.transferComplete, 'emit');
 
     component.form.controls['fromId'].setValue(1);
     component.form.controls['toId'].setValue(2);
@@ -78,6 +78,6 @@ describe('TransferFormComponent', () => {
     component.onSubmit();
 
     expect(beneficioService.transfer).toHaveBeenCalledWith(1, 2, 50);
-    expect(router.navigate).toHaveBeenCalledWith(['/']);
+    expect(component.transferComplete.emit).toHaveBeenCalled();
   });
 });
